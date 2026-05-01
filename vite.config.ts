@@ -4,28 +4,31 @@ import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '.', '');
+  // Carga las variables de entorno (.env)
+  const env = loadEnv(mode, process.cwd(), '');
   
   return {
-    // Reemplaza 'acumaster' por el nombre exacto de tu repositorio en GitHub
+    // IMPORTANTE: Asegúrate de que el nombre del repo sea 'acumaster'
     base: '/acumaster/', 
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      // Esto permite que el código acceda a la API KEY en GitHub y en local
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY),
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        // Ajustado para que apunte correctamente a la raíz del proyecto
+        '@': path.resolve(__dirname, './'),
       },
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modify—file watching is disabled to prevent flickering during agent edits.
+      // Configuración de HMR para compatibilidad con editores
       hmr: process.env.DISABLE_HMR !== 'true',
     },
     build: {
-      // Opcional: Esto ayuda a que los archivos se generen de forma más limpia para GitHub Pages
       outDir: 'dist',
+      // Esto asegura que los activos se manejen correctamente en subcarpetas
+      assetsDir: 'assets',
     }
   };
 });
