@@ -1,34 +1,33 @@
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
-import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(({ mode }) => {
-  // Carga las variables de entorno (.env)
-  const env = loadEnv(mode, process.cwd(), '');
+export default defineConfig({
+  // Base debe coincidir exactamente con el nombre de tu repositorio
+  base: '/acumaster/',
   
-  return {
-    // IMPORTANTE: Asegúrate de que el nombre del repo sea 'acumaster'
-    base: '/acumaster/', 
-    plugins: [react(), tailwindcss()],
-    define: {
-      // Esto permite que el código acceda a la API KEY en GitHub y en local
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY),
+  plugins: [
+    react(),
+    tailwindcss()
+  ],
+
+  resolve: {
+    alias: {
+      // Configuración estándar para que el símbolo @ apunte a la carpeta src
+      '@': path.resolve(__dirname, './src'),
     },
-    resolve: {
-      alias: {
-        // Ajustado para que apunte correctamente a la raíz del proyecto
-        '@': path.resolve(__dirname, './'),
-      },
-    },
-    server: {
-      // Configuración de HMR para compatibilidad con editores
-      hmr: process.env.DISABLE_HMR !== 'true',
-    },
-    build: {
-      outDir: 'dist',
-      // Esto asegura que los activos se manejen correctamente en subcarpetas
-      assetsDir: 'assets',
-    }
-  };
+  },
+
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    // Esto ayuda a evitar problemas de archivos grandes en GitHub Pages
+    chunkSizeWarningLimit: 1600,
+  },
+
+  // Manejo de variables de entorno de forma nativa para Vite
+  define: {
+    'process.env': {}
+  }
 });
